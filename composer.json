@@ -1,0 +1,17 @@
+{
+    "name": "lyignore\/websocket-upload",
+    "description": "websocket upload img ansy receive messages",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "liuyang",
+            "email": "1585296643@qq.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Lyignore\\WebsocketUpload\\": "src"
+        }
+    }
+}
