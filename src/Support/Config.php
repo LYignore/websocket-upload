@@ -13,7 +13,7 @@ class Config implements ArrayAccess
 
     private static $instance;
 
-    public function __construct(array $config = [])
+    protected function __construct(array $config = [])
     {
         $this->path = __DIR__.'/../Config';
         $this->autoLoad();

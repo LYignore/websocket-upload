@@ -8,10 +8,19 @@
             "email": "1585296643@qq.com"
         }
     ],
-    "require": {},
+    "require": {
+        "illuminate/support": "*"
+    },
     "autoload": {
         "psr-4": {
             "Lyignore\\WebsocketUpload\\": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Lyignore\\WebsocketUpload\\SwooleServiceProvider"
+            ]
         }
     }
 }
