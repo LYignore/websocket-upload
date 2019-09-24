@@ -13,14 +13,14 @@ class SwooleServiceProvider extends ServiceProvider
 
     public function register()
     {
-    }
-
-    public function boot()
-    {
         // 注册配置文件
         $this->publishes([
             __DIR__ . '/../config/swoole.php' => config_path('swoole.php')
         ]);
+    }
+
+    public function boot()
+    {
         // 注册命令
         if($this->app->runningInConsole()){
             $config = config('swoole');
