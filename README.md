@@ -4,9 +4,20 @@
 
 
 ## Installing
-
+### 安装插件
 ```shell
 $ composer require lyignore/websocket-upload -vvv
+```
+### 添加 ServiceProvider
+```angular2html
+在文件夹.\config\app.php的providers数组中添加：
+Lyignore\WebsocketUpload\SwooleServiceProvider::class
+```
+### 注册配置信息
+```angular2html
+php artisan vendor:publish --tag=swoole-upload-img
+
+成功后.\config\文件夹下生成swoole.php文件，自定义配置信息
 ```
 
 ## Usage
