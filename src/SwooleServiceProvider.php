@@ -23,7 +23,7 @@ class SwooleServiceProvider extends ServiceProvider
     {
         // 注册命令
         if($this->app->runningInConsole()){
-            $config = config('swoole');
+            $config = config('swoole')??[];
             Config::getInstance($config);
             $this->commands([
                 Swoole::class,
