@@ -1,7 +1,6 @@
 <?php
 namespace Lyignore\WebsocketUpload;
 use App\Models\User;
-use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Auth;
 use Lyignore\WebsocketUpload\Support\Config;
 use Lyignore\WebsocketUpload\Traits\Resource;
@@ -74,7 +73,7 @@ class WebsocketUpload{
     private function setListern($config = [])
     {
         $config = array_merge($this->config->get('listern'), $config);
-        echo "开启监听{$config['port']}\n";
+        echo "开启监听{$config['port']}".PHP_EOL;
         $this->listern = $this->server->addListener($config['uri'], $config['port'], $config['type']);
         $this->listern->set(['open_http_protocol' => true]);
         $this->listern->on('request', [$this, 'listernRequest']);
@@ -101,7 +100,7 @@ class WebsocketUpload{
                     $this->server->push($result['fd'], json_encode($return));
                 }
             }else{
-                echo '没有对应的APPID'.$getParams['app_id'];
+                echo '没有对应的APPID'.$getParams['app_id'].PHP_EOL;
             }
         }
     }
@@ -148,11 +147,21 @@ class WebsocketUpload{
     public function wsMessage($server, $frame)
     {
         $frameParams = json_decode($frame->data, true);
+        if(empty($frameParams) || !isset($frameParams['result'])|| !isset($frameParams['filename'])){
+            $res = Resource::typeError('No pictures uploaded');
+            $server->push($frame->fd, json_encode($res));
+            return false;
+        }
         $imgData = $frameParams['result'];
         $imgName = $frameParams['filename'];
         $result = $this->getBufferType($imgData, $imgName);
         if(isset($result['buffer'])){
-            $imgId = md5($result['buffer']);
+            if($this->config->get('original_name')){
+                $imgId = $result['filename'];
+            }else{
+                //$imgId = md5($result['buffer']);
+                $imgId = md5(uniqid(md5(microtime(true)),true));
+            }
             $filename = public_path("image/".$imgId.".".$result['type']);
             file_put_contents($filename, $result['buffer']);
 
@@ -196,12 +205,12 @@ class WebsocketUpload{
     {
         if(!empty($this->user)){
             $appid = $this->user->appid;
-            echo $appid;
+            echo $appid.PHP_EOL;
             if($this->table->exist($appid)){
                 $this->table->del($appid);
             }
         }
-        echo "{$fd}连接关闭";
+        echo "{$fd}连接关闭".PHP_EOL;
     }
 
     /**
