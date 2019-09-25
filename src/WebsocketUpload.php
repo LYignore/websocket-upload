@@ -164,18 +164,14 @@ class WebsocketUpload{
             }
             $filename = public_path("image/".$imgId.".".$result['type']);
             file_put_contents($filename, $result['buffer']);
-
-//            $uploadData['img_md5_id'] = $imgId;
-//            $upload = Resource::uploadSuccess($uploadData);
-//            $server->push($frame->fd, json_encode($upload));
-            $resToken = $this->getToken($this->user);
+            $this->getToken($this->user);
             if($tokens = self::$tokenChan->pop()){
                 $res['timestamp'] = time();
                 // 获取签名
                 $sign = AuthUser::getSigns($res, $this->user, $tokens);
                 $res['token'] = $tokens;
                 // 发送图片识别
-                $resDiscern = AuthUser::imageRecognition($res, $sign, $filename);
+                AuthUser::imageRecognition($res, $sign, $filename);
             }
             if($discern = self::$discernChan->pop()){
                 $return  = Resource::uploadDiscern($discern);
@@ -205,7 +201,6 @@ class WebsocketUpload{
     {
         if(!empty($this->user)){
             $appid = $this->user->appid;
-            echo $appid.PHP_EOL;
             if($this->table->exist($appid)){
                 $this->table->del($appid);
             }

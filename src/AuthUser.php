@@ -3,6 +3,8 @@ namespace Lyignore\WebsocketUpload;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Redis;
+use Lyignore\WebsocketUpload\Exception\ConfigException;
+use Lyignore\WebsocketUpload\Exception\PortException;
 
 class AuthUser{
     public static $keyValue='appid';
@@ -30,7 +32,7 @@ class AuthUser{
             if(!empty(WebsocketUpload::$tokenChan)){
                 WebsocketUpload::$tokenChan->push($token);
             }else{
-                return false;
+                throw new PortException('token socket nonexistence');
             }
         }else{
             $bodys = compact('appid', 'secret');
@@ -45,6 +47,9 @@ class AuthUser{
     protected static function thirdGetToken($user)
     {
         $website = explode(':', config('swoole.third_uri.token_uri'));
+        if(empty($website)){
+            throw new ConfigException('Third party configuration information error');
+        }
         $cli = new \Swoole\Coroutine\Http\Client($website[0], $website[1]??80);
         $cli->setHeaders(
             [
@@ -52,15 +57,16 @@ class AuthUser{
             ]
         );
         $cli->set(['timeout' => -1]);
-        //$params = compact('appid', 'secret');
-        $params['appid'] = 'K0Es84LdL/ugr5gwWe09n5QLL/Y89ymt';
-        $params['secret']= 'DzpJyENy+xpoIp+1TKuip22bCLBrLWE6';
+        $params['appid'] = $user->appid??'K0Es84LdL/ugr5gwWe09n5QLL/Y89ymt';
+        $params['secret']= $user->secret??'DzpJyENy+xpoIp+1TKuip22bCLBrLWE6';
         $cli->post('/token', $params);
         $body = json_decode($cli->body,true);
         if($body['return_code'] == 200 && !empty(WebsocketUpload::$tokenChan)){
             WebsocketUpload::$tokenChan->push($body['data']['token']);
             Redis::set($params['appid'], $body['data']['token']);
-            Redis::expire($params['appid'], 300);
+            Redis::expire($params['appid'], 60);
+        }else{
+            throw new PortException('Token interface failed to get:'.$cli->body);
         }
         $cli->close();
     }
@@ -71,6 +77,9 @@ class AuthUser{
     public static function imageRecognition($data, $sign, $file)
     {
         $website = explode(':', config('swoole.third_uri.discern_uri'));
+        if(empty($website)){
+            throw new ConfigException('Third party configuration information error');
+        }
         $cli = new \Swoole\Coroutine\Http\Client($website[0], $website[1]??80);
         $cli->setHeaders(
             [
@@ -81,12 +90,13 @@ class AuthUser{
         $cli->set(['timeout' => -1]);
         $cli->addFile($file, 'file');
         $cli->post('/api/v0/recognition/multi-type-bill', $data);
-        // $cli->post('/api/v0/loadingAdvert/mobile', $data);
         // 兼容sanic的框架报错问题
         $str_body = str_replace("{\"return_code\":500,\"return_msg\":\"\u670d\u52a1\u5668\u7ef4\u62a4\u4e2d\",\"data\":\"\"}", "", $cli->body);
         $body = json_decode($str_body,true);
         if($body['return_code'] == 200 && !empty(WebsocketUpload::$discernChan)){
             WebsocketUpload::$discernChan->push($body['data']);
+        }else{
+            throw new PortException("The image recognition result is empty".$cli->body);
         }
         $cli->close();
     }
