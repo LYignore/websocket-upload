@@ -8,7 +8,7 @@
 ```shell
 $ composer require lyignore/websocket-upload -vvv
 ```
-### 添加 ServiceProvider
+### 添加 ServiceProvider(laravel小于5.4的添加)
 ```angular2html
 在文件夹.\config\app.php的providers数组中添加：
 Lyignore\WebsocketUpload\SwooleServiceProvider::class
