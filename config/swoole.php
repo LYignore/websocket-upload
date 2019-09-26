@@ -3,7 +3,6 @@ return [
     'listern' => [
         'uri'  => '0.0.0.0',
         'port' => '8081',
-        'path_info' => '/api/invoice/synData',
         'type' => SWOOLE_SOCK_TCP,
     ],
     'memory' => [
@@ -12,6 +11,7 @@ return [
         'status' => 'int',
     ],
     'socket' => [
+        'port' => 8000,
         'worker_num'  => 8,
         'package_max_length' => 40 * 1024 * 1024,
         'open_eof_check' => true,

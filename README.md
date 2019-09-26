@@ -20,6 +20,11 @@ php artisan vendor:publish --tag=swoole-upload-img
 成功后.\config\文件夹下生成swoole.php文件，自定义配置信息
 ```
 
+### 运行websocket服务
+```angularjs
+php artisan swoole: start
+```
+
 ## Usage
 
 TODO

@@ -7,7 +7,7 @@ use Lyignore\WebsocketUpload\Traits\Resource;
 use Lyignore\WebsocketUpload\Traits\System;
 
 class WebsocketUpload{
-    const PORT = '8000';
+    protected $port='8000';
     protected $config;      // 总体的配置信息
     protected $server;      // swoole的实例化
     protected $table;       // 内存结构表
@@ -32,6 +32,11 @@ class WebsocketUpload{
         $this->setListern();
     }
 
+    /**
+     * 调用websocket开始的文件
+     * @param mixed $arg1 参数一的说明
+     * @return lconn
+     */
     public function start()
     {
         $this->server->on("open", [$this, 'wsOpen']);
@@ -43,12 +48,16 @@ class WebsocketUpload{
 
     /**
      * 实例化swoole
+     * @access private
+     * @param array $config socket配置信息
+     * @return lconn
      */
     private function initSwoole($config = [])
     {
         if(!$this->server instanceof \Swoole\WebSocket\Server){
-            $this->server = new \Swoole\WebSocket\Server("0.0.0.0", self::PORT);
             $config = array_merge($this->config->get('socket'), $config);
+            $port = $config['port']??$this->port;
+            $this->server = new \Swoole\WebSocket\Server("0.0.0.0", $port);
             $this->server->set([
                 'worker_num'  => $config['worker_num'],
                 'package_max_length' => $config['package_max_length'],
@@ -60,6 +69,8 @@ class WebsocketUpload{
 
     /**
      * 创建共享内存
+     * @access public
+     * @param array $config memory配置信息
      */
     public function createTable($config = [])
     {
@@ -69,6 +80,8 @@ class WebsocketUpload{
 
     /**
      * 创建监听进程
+     * @access private
+     * @param array $config listern配置信息
      */
     private function setListern($config = [])
     {
@@ -82,27 +95,29 @@ class WebsocketUpload{
 
     /**
      * 监听到消息后的操作方法
+     * @access public
+     * @param object $request 请求资源
+     * @param object $response 相应资源
      */
     public function listernRequest($request, $response)
     {
-        $config = $this->config->get('listern');
-        $getServer = $request->server;
-        if($config['path_info'] == $getServer['path_info']){
-            $getParamstr = $request->rawContent();
-            $getParams = json_decode($getParamstr, true);
-            if(isset($getParams['app_id'])){
-                // 通过appid去共享内存获取对应的客户端连接标识fd
-                $result = $this->table->get($getParams['app_id']);
-                // 判断是否有有效的websocket连接
-                $link = $this->server->exist($result['fd']);
-                if($result && $link){
-                    $return = Resource::discernSuccess($getParams);
-                    $this->server->push($result['fd'], json_encode($return));
-                }
-            }else{
-                echo '没有对应的APPID'.$getParams['app_id'].PHP_EOL;
+        $getParamstr = $request->rawContent();
+        $getParams = json_decode($getParamstr, true);
+        if(isset($getParams['app_id'])){
+            // 通过appid去共享内存获取对应的客户端连接标识fd
+            $result = $this->table->get($getParams['app_id']);
+            // 判断是否有有效的websocket连接
+            $link = $this->server->exist($result['fd']);
+            if($result && $link){
+                $return = Resource::discernSuccess($getParams);
+                $this->server->push($result['fd'], json_encode($return));
             }
+        }else{
+            echo '没有对应的APPID'.$getParams['app_id'].PHP_EOL;
         }
+
+        $responseParam = Resource::success();
+        $response->end(json_encode($responseParam));
     }
 
     public function listernClose()
