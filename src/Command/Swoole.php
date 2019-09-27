@@ -61,6 +61,6 @@ class Swoole extends Command
         if(! $this->server instanceof WebsocketUpload){
             $this->server = new WebsocketUpload();
         }
-        return $this->server->wsClose();
+        return $this->server->allClose();
     }
 }

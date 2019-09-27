@@ -62,6 +62,7 @@ class WebsocketUpload{
                 'worker_num'  => $config['worker_num'],
                 'package_max_length' => $config['package_max_length'],
                 'open_eof_check' => $config['open_eof_check'],
+                'daemonize' => $config['daemonize']??false,
             ]);
         }
         return $this->server;
@@ -221,6 +222,12 @@ class WebsocketUpload{
             }
         }
         echo "{$fd}连接关闭".PHP_EOL;
+    }
+
+    public function allClose()
+    {
+        echo "websocket服务器关闭".PHP_EOL;
+        $this->server->close();
     }
 
     /**

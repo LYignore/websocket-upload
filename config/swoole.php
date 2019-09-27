@@ -20,5 +20,6 @@ return [
         'token_uri' => '192.168.2.177:23131',
         'discern_uri' => '192.168.2.177:7002',
     ],
-    'original_name' => true
+    'original_name' => true,
+    'daemonize' => false,
 ];
