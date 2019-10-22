@@ -20,6 +20,12 @@ return [
         'token_uri' => '192.168.2.177:23131',
         'discern_uri' => '192.168.2.177:7002',
     ],
+    'provider' => [
+        'default' => [
+            'driver' => 'eloquent',
+            'model'  => App\Models\User::class,
+        ]
+    ],
     'original_name' => true,
     'daemonize' => false,
 ];
