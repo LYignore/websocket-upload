@@ -57,8 +57,8 @@ class AuthUser{
             ]
         );
         $cli->set(['timeout' => -1]);
-        $params['appid'] = $user->appid??'K0Es84LdL/ugr5gwWe09n5QLL/Y89ymt';
-        $params['secret']= $user->secret??'DzpJyENy+xpoIp+1TKuip22bCLBrLWE6';
+        $params['appid'] = $user['appid']??'K0Es84LdL/ugr5gwWe09n5QLL/Y89ymt';
+        $params['secret']= $user['secret']??'DzpJyENy+xpoIp+1TKuip22bCLBrLWE6';
         $cli->post('/token', $params);
         $body = json_decode($cli->body,true);
         if($body['return_code'] == 200 && !empty(WebsocketUpload::$tokenChan)){
