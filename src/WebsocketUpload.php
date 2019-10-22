@@ -138,7 +138,8 @@ class WebsocketUpload{
             $appid = $query['appid'];
             $this->appid = $appid;
             // 查询用户信息
-            $userProvider = config('provider.default.model');
+            $provider = $this->config->get('provider');
+            $userProvider = $provider['default']['model'];
             $this->user = AuthUser::getUserInfo($appid, $userProvider);
             $fd = $request->fd;
             if(!empty($this->user))
